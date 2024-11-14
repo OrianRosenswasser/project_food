@@ -1,0 +1,39 @@
+{% extends "master.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1 class="emoji">🎉 Register</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_firstname" class="form-label">First Name</label>
+            {{ form.firstname }}
+        </div>
+        <div class="mb-3">
+            <label for="id_lastname" class="form-label">Last Name</label>
+            {{ form.lastname }}
+        </div>
+        <div class="mb-3">
+            <label for="id_email" class="form-label">Email</label>
+            {{ form.email }}
+        </div>
+        <div class="mb-3">
+            <label for="id_password" class="form-label">Password</label>
+            {{ form.password }}
+        </div>
+
+        <button type="submit" class="btn btn-lg w-100">🎈 Register Now</button>
+    </form>
+
+    <div class="text-center mt-3">
+        <a href="{% url 'login' %}">Already have an account? Log in here 👉</a>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+

@@ -1,0 +1,59 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<h1>Post Food</h1>
+
+<form id="food-post-form">
+    <input type="text" id="title" placeholder="Title" required><br>
+    <textarea id="description" placeholder="Description" required></textarea><br>
+    <input type="number" id="quantity" placeholder="Quantity" required><br>
+    <input type="datetime-local" id="expiration_date" placeholder="Expiration Date" required><br>
+    <input type="text" id="whatsapp_link" placeholder="WhatsApp Link" required><br>
+    <input type="text" id="collection_point" placeholder="Collection Point" required><br>
+    <input type="file" id="photo" accept="image/*"><br>
+    <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+    <button type="button" onclick="submitFoodPost()">Submit Post</button>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    async function submitFoodPost() {
+        const csrfToken = document.getElementById('csrf-token').value;
+
+        const formData = new FormData();
+        formData.append('title', document.getElementById('title').value);
+        formData.append('description', document.getElementById('description').value);
+        formData.append('quantity', document.getElementById('quantity').value);
+        
+        // Ensure expiration date is in the correct format for your backend
+        const expirationDate = document.getElementById('expiration_date').value;
+        if (expirationDate) {
+            formData.append('expiration_date', expirationDate);
+        } else {
+            alert('Please select an expiration date.');
+            return;
+        }
+
+        formData.append('whatsapp_link', document.getElementById('whatsapp_link').value);
+        formData.append('collection_point', document.getElementById('collection_point').value);
+        formData.append('photo', document.getElementById('photo').files[0]);
+
+        try {
+            const response = await axios.post('/post_food/', formData, {  <!-- Same path here -->
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            alert('Food post created successfully!');
+            document.getElementById("food-post-form").reset();
+        } catch (error) {
+            console.error('Error creating food post:', error);
+            alert('Failed to create food post. Please try again.');
+        }
+    }
+</script>
+{% endblock %}
+
+
+

@@ -1,0 +1,94 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<h1>Request Food</h1>
+
+<div class="food-post-details">
+    <h2>{{ food_post.title }}</h2>
+    <p>{{ food_post.description }}</p>
+    
+    {% if food_post.photo %}
+        <img src="{{ food_post.photo.url }}" alt="Food Image" class="food-image">
+    {% else %}
+        <p>No image available</p>
+    {% endif %}
+    
+    <p>Expiration Date: {{ food_post.expiration_date }}</p>
+    <p>Collection Point: 
+        <a href="https://www.google.com/maps?q={{ food_post.collection_point }}" target="_blank">
+            {{ food_post.collection_point }}
+        </a>
+    </p>
+    <p>Contact: <a href="https://wa.me/{{ food_post.whatsapp_link }}" target="_blank">WhatsApp</a></p>
+</div>
+
+<div class="request-form">
+    <p>Are you interested in this food? Did you send a WhatsApp message to the donor? Let us know by Clicking below:</p>
+    <form id="request-form">
+        <input type="hidden" name="food_post" value="{{ food_post.id }}">
+        <button type="button" class="btn" onclick="submitRequest()">Yes! Waiting for my {{ food_post.title }}</button>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    async function submitRequest() {
+        const foodPostId = document.querySelector('[name="food_post"]').value;
+
+        try {
+            const response = await axios.post(`/request_food/${foodPostId}/`, {
+                food_post: foodPostId,
+                // If you have user info like `requested_by`, you can send it here
+            }, {
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',  // CSRF token for security
+                }
+            });
+            alert(response.data.message);  // Display success message from API
+            window.location.href = '/food_feed/';  // Redirect after success
+        } catch (error) {
+            console.error('Error submitting food request:', error);
+            alert('An error occurred while submitting your request. Please try again.');
+        }
+    }
+</script>
+
+<style>
+    .food-post-details {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin: 20px 0;
+    }
+
+    .food-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+
+    .request-form {
+        background-color: #f8e0e0;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+
+    .btn {
+        background-color: #ff6b6b;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        display: inline-block;
+    }
+
+    .btn:hover {
+        background-color: #e06a6a;
+    }
+</style>
+
+{% endblock %}

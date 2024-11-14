@@ -1,0 +1,18 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block title %}Home | Food Share{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1>Welcome to Food Share!</h1>
+    <p>🍽️ Join our community and connect with people through food sharing 🍽️</p>
+
+    <div class="mt-4">
+        <video width="640" height="360" autoplay loop muted>
+            <source src="{% static 'videos/food_share.mp4' %}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>             
+    </div>
+</div>
+{% endblock %}

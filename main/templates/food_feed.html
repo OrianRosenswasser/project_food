@@ -1,0 +1,165 @@
+{% extends 'master.html' %}
+
+{% block content %}
+<h1>Food Feed</h1>
+
+<div id="food-posts"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const loggedInUserId = "{{ user.id }}";  // Django's user ID
+
+    async function loadFoodPosts() {
+        try {
+            const response = await axios.get('/food_feed/', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const posts = response.data;
+            const postsContainer = document.getElementById('food-posts');
+            postsContainer.innerHTML = ''; // Clear previous content
+
+            posts.forEach(post => {
+                const postDiv = document.createElement('div');
+                postDiv.classList.add('food-post');
+                
+                const isOwnPost = post.posted_by === loggedInUserId;
+                
+                postDiv.innerHTML = `
+                    <h3>${post.title}</h3>
+                    <p>${post.description}</p>
+                    ${
+                        post.photo
+                            ? `<img src="${post.photo}" alt="Food Image" class="food-image">`
+                            : '<p>No image available</p>'
+                    }
+                    <p class="expiration-date">Expiration Date: ${new Date(post.expiration_date).toLocaleDateString()}</p>
+                    <p>Contact: <a href="https://wa.me/${post.whatsapp_link}">WhatsApp</a></p>
+                    <p>Collection Point: ${post.collection_point}</p>
+                    ${isOwnPost ? `
+                        <button class="edit-btn" data-id="${post.id}">Edit</button>
+                        <button class="delete-btn" data-id="${post.id}">Delete</button>
+                    ` : ''}
+                    <button class="request-btn" data-id="${post.id}">Request</button>
+                `;
+
+                postsContainer.appendChild(postDiv);
+            });
+
+            // Add event listeners only after loading all posts
+            addEventListeners();
+        } catch (error) {
+            console.error('Error loading food posts:', error);
+        }
+    }
+
+    function addEventListeners() {
+        document.querySelectorAll('.request-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const postId = this.getAttribute('data-id');
+                window.location.href = `/request_food/${postId}/`;
+            });
+        });
+
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const postId = this.getAttribute('data-id');
+                window.location.href = `/edit_food/${postId}/`;
+            });
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', async function() {
+                const postId = this.getAttribute('data-id');
+                try {
+                    const response = await axios.delete(`/api/food_feed/${postId}/`);
+                    if (response.status === 204) {
+                        alert('Post deleted successfully!');
+                        loadFoodPosts();
+                    }
+                } catch (error) {
+                    console.error('Error deleting post:', error);
+                }
+            });
+        });
+    }
+
+    // Load food posts when the page loads
+    window.onload = loadFoodPosts;
+</script>
+
+<style>
+    /* Style for food feed container */
+    #food-posts {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .food-post {
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 80%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        box-sizing: border-box;
+        transition: transform 0.3s ease;
+    }
+
+    .food-post:hover {
+        transform: scale(1.03);
+    }
+
+    .food-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin: 10px 0;
+    }
+
+    .expiration-date {
+        font-size: 14px;
+        color: #777;
+        margin-bottom: 10px;
+    }
+
+    a {
+        color: #4CAF50;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    h3 {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+
+    p {
+        font-size: 16px;
+        color: #333;
+        line-height: 1.5;
+        margin-bottom: 10px;
+    }
+
+    button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 5px;
+        margin: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+</style>
+
+{% endblock %}
